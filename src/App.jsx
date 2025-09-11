@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, signInWithCustomToken } from 'firebase/auth';
 
-// This is the main App component that contains all the logic and UI.
+
 const App = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -10,9 +10,7 @@ const App = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
-
-  // Firestore & Auth instances. These will be initialized in useEffect.
-  const [db, setDb] = useState(null);
+   const [db, setDb] = useState(null);
   const [auth, setAuth] = useState(null);
   const [userId, setUserId] = useState(null);
 
@@ -49,7 +47,7 @@ const App = () => {
           });
       }
 
-      // Cleanup the listener on component unmount
+      
       return () => unsubscribe();
     } catch (e) {
       console.error("Failed to initialize Firebase:", e);
@@ -69,7 +67,7 @@ const App = () => {
       setError('');
       setLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
-      // Auth state will be updated by the onAuthStateChanged listener
+      
     } catch (error) {
       console.error("Sign-in error:", error);
       setError(error.message);
@@ -78,13 +76,13 @@ const App = () => {
     }
   };
 
-  // Handle user sign-out
+  // User sign-out
   const handleSignOut = async () => {
     if (!auth) return;
     try {
       setError('');
       await signOut(auth);
-      // Auth state will be updated by the onAuthStateChanged listener
+      
     } catch (error) {
       console.error("Sign-out error:", error);
       setError(error.message);
@@ -103,7 +101,7 @@ const App = () => {
     <div>
       <div>
         <h1>
-          Firebase Auth
+          Authentication
         </h1>
 
         {user ? (
