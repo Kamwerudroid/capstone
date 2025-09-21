@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, setDoc, getDoc } from 'firebase/firestore'; 
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -17,20 +17,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const auth=getAuth(app);
-export const loginUser = (email, password) => signInWithEmailAndPassword(auth, email, password); 
-export const logoutUser = () => signOut(auth);
 
-const db = getFirestore(app); 
-export const usersCollection = collection(db, 'users'); 
-export const coursesCollection = collection(db, 'courses'); 
-export const setUserRole = (userId, role) => setDoc(doc(db, 'users', userId), { role }); 
-export const getUserRole = async (userId) => {
-    try { 
-const userDoc = await getDoc(doc(db, 'users', userId)); 
-return userDoc.exists() ? userDoc.data().role : null; 
-} catch (error) { 
-console.error('Error getting user role:', error); 
-return null; 
-} 
-};
+// Initialize Firebase services
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+export { db, auth };
