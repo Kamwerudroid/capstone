@@ -150,7 +150,7 @@ const AdminDashboard = () => {
     
       <div className="dashboard-container">
           <header>
-              <h2>Admin Dashboard</h2>
+              <h2 className='font-5x font-bold'>Admin Dashboard</h2>
               <button onClick={handleLogout}>Log Out</button>
           </header>
 
@@ -165,16 +165,16 @@ const AdminDashboard = () => {
           </div>
 
           <div className="list-section">
-              <h3>Existing Stores</h3>
+              <h3 className='font-bold font-2x m-3'>Existing Stores</h3>
               <ul>
                   {stores.map(store => (
                       <li key={store.id}>{store.name} - {store.location} ({store.distributor})</li>
                   ))}
               </ul>
-          </div>
+          </div><hr></hr>
 
           <div className="form-section">
-              <h3>Add New Product</h3>
+              <h3 className='m-3 font-bold font-2x'>Add New Product</h3>
               <form onSubmit={handleAddProduct}>
                   <input type="text" placeholder="Product Name" value={productName} onChange={(e) => setProductName(e.target.value)} required />
                   <input type="number" placeholder="Quantity" value={productQuantity} onChange={(e) => setProductQuantity(e.target.value)} required />
@@ -183,11 +183,11 @@ const AdminDashboard = () => {
           </div>
 
           <div className="list-section">
-              <h3>Current Inventory</h3>
+              <h3 className='m-5 font-bold font-4x'>Current Inventory</h3>
               <table>
                   <thead>
                       <tr>
-                          <th>Name</th>
+                          <th className='pr-2'>Name</th>
                           <th>Quantity</th>
                           <th>Actions</th>
                       </tr>
@@ -207,7 +207,7 @@ const AdminDashboard = () => {
           </div>
 
           <div className="analytics-section">
-              <h3>Sales Analytics</h3>
+              <h3 className='m-2 font-bold font-3x mt-5'>Sales Analytics</h3>
               
               <h4>Monthly Sales Trend</h4>
               <div style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>

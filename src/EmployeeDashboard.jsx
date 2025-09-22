@@ -106,7 +106,7 @@ const EmployeeDashboard = () => {
   return (
     <div className="dashboard-container">
       <header>
-        <h2>Employee Dashboard</h2>
+        <h2 className='font-bold font-3x'>Employee Dashboard</h2>
         <button onClick={handleLogout}>Log Out</button>
       </header>
       

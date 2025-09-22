@@ -39,7 +39,7 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <h2>Inventory System Login</h2>
+      <h2 className='font-bold font-4x'>Inventory System Login</h2>
       <form onSubmit={handleLogin}>
         <input
           type="email"
