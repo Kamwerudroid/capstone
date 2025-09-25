@@ -95,11 +95,22 @@ const AdminDashboard = () => {
     getStores();
   };
 
-  const handleDeleteStore = async (id) => {
-    const storeDoc = doc(db, "stores", id);
-    await deleteDoc(storeDoc);
-    getStores();
-  };
+  const handleDeleteStore = async (id, storeName) => {    
+    const confirmDelete = window.confirm(`Are you sure you want to delete the store: ${storeName}? This action cannot be undone.`);
+
+    
+    if (confirmDelete) {
+        try {
+            const storeDoc = doc(db, 'stores', id);
+            await deleteDoc(storeDoc);
+            getStores(); // Refresh the store list
+            alert(`${storeName} has been successfully deleted.`);
+        } catch (error) {
+            console.error("Error deleting store: ", error);
+            alert(`Failed to delete ${storeName}. Please try again.`);
+        }
+    }
+};
 
   // --- Product Management ---
   const handleAddProduct = async (e) => {
@@ -118,11 +129,22 @@ const AdminDashboard = () => {
     getProducts();
   };
 
-  const handleDeleteProduct = async (id) => {
-    const productDoc = doc(db, "products", id);
-    await deleteDoc(productDoc);
-    getProducts();
-  };
+  const handleDeleteProduct = async (id, productName) => {    
+    const confirmDelete = window.confirm(`Are you sure you want to delete the product: ${productName}?`);
+    
+    // If the user confirms, proceed with the deletion
+    if (confirmDelete) {
+        try {
+            const productDoc = doc(db, 'products', id);
+            await deleteDoc(productDoc);
+            getProducts(); // Refresh the list
+            alert(`${productName} has been successfully deleted.`);
+        } catch (error) {
+            console.error("Error deleting product: ", error);
+            alert(`Failed to delete ${productName}. Please try again.`);
+        }
+    }
+};
 
   // --- Sales Analytics Dashboard (Updated) ---
   const getMonthlySales = () => {
@@ -235,9 +257,7 @@ const AdminDashboard = () => {
                 <td className="border-2">{store.location}</td>
                 <td className="border-2">{store.distributor}</td>
                 <td>
-                  <button onClick={() => handleDeleteStore(store.id)}>
-                    Delete
-                  </button>
+                  <button onClick={() => handleDeleteStore(store.id, store.name)}>Delete</button>
                 </td>
               </tr>
             ))}
@@ -279,11 +299,11 @@ const AdminDashboard = () => {
         <table>
           <thead>
             <tr>
-              <th className="pr-2 border-2">Name</th>
-              <th className="border-2">Quantity</th>
-              <th className="border-2">Unit price</th>
-              <th className="border-2">Total sales</th>
-              <th className="border-2">Actions</th>
+              <th className="px-2 border-2">Name</th>
+              <th className="px-2 border-2">Quantity</th>
+              <th className="px-2 border-2">Unit price KSh</th>
+              <th className="px-2 border-2">Total sales</th>
+              <th className="px-2 border-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -291,8 +311,8 @@ const AdminDashboard = () => {
               <tr key={product.id}>
                 <td className="border-2">{product.name}</td>
                 <td className="border-2">{product.quantity}</td>
-                <td className="border-2">{product.unitPrice}</td>
-                <td className="border-2">{product.totalSales}</td>
+                <td className="border-2">KSh{product.unitPrice}</td>
+                <td className="border-2">KSh{product.totalSales}</td>
 
                 <td className="border-2">
                   <button onClick={() => handleDeleteProduct(product.id)}>
