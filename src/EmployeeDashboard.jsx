@@ -111,18 +111,18 @@ const EmployeeDashboard = () => {
       </header>
       
       <div className="store-select">
-        <h4>Select your Store:</h4>
+        <h4 className='bg-grey-300 m-2 border-2'>Select your Store:</h4>
         <select value={selectedStore} onChange={(e) => setSelectedStore(e.target.value)}>
-          <option value="">-- Choose a Store --</option>
+          <option value="" className='border-2' >-- Choose a Store --</option>
           {stores.map(store => (
             <option key={store.id} value={store.id}>{store.name}</option>
           ))}
         </select>
-      </div>
+      </div><hr />
 
       {/* NEW: Manual Sales Form */}
       <div className="form-section">
-        <h3>Record a New Sale</h3>
+        <h3 className='font-bold text-2x mt-3'>Record a New Sale</h3>
         <form onSubmit={handleManualSale}>
           <select value={saleProductId} onChange={(e) => setSaleProductId(e.target.value)} required>
             <option value="">-- Select Product --</option>
@@ -143,7 +143,7 @@ const EmployeeDashboard = () => {
       </div>
 
       <div className="inventory-list">
-        <h3>Current Inventory</h3>
+        <h3>Sold Inventory</h3>
         <table>
           <thead>
             <tr>
