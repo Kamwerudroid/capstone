@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "./firebase";
 import { signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate ,Routes, Route} from "react-router-dom";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -26,6 +26,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import Sidebar from './Sidebar';
 
 import "./Dashboard.css";
 
@@ -44,6 +45,10 @@ const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
   const [stores, setStores] = useState([]);
   const [sales, setSales] = useState([]);
+  const [selectedStoreId, setSelectedStoreId] = useState('');
+  const [selectedProductId, setSelectedProductId] = useState(''); 
+  
+  
 
   // State for Forms
   const [productName, setProductName] = useState("");
@@ -146,39 +151,31 @@ const AdminDashboard = () => {
     }
 };
 
-  // --- Sales Analytics Dashboard (Updated) ---
-  const getMonthlySales = () => {
+const getMonthlyProductSales = () => {
     const monthlySalesData = {};
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    sales.forEach((sale) => {
-      // Get the month and year from the Firestore timestamp
-      const date = sale.timestamp.toDate();
-      const monthYear = `${months[date.getMonth()]}-${date.getFullYear()}`;
+    // Filter sales based on the selected product ID
+    const filteredSales = selectedProductId 
+        ? sales.filter(sale => sale.productId === selectedProductId)
+        : sales;
 
-      if (monthlySalesData[monthYear]) {
-        monthlySalesData[monthYear] += sale.quantitySold;
-      } else {
-        monthlySalesData[monthYear] = sale.quantitySold;
+    filteredSales.forEach(sale => {
+      if (sale.timestamp && typeof sale.timestamp.toDate === 'function') {
+        const date = sale.timestamp.toDate();
+        const monthYear = `${months[date.getMonth()]}-${date.getFullYear()}`;
+        
+        if (monthlySalesData[monthYear]) {
+          monthlySalesData[monthYear] += sale.quantitySold;
+        } else {
+          monthlySalesData[monthYear] = sale.quantitySold;
+        }
       }
     });
 
     const sortedKeys = Object.keys(monthlySalesData).sort((a, b) => {
-      const dateA = new Date(a.replace("-", " 1, "));
-      const dateB = new Date(b.replace("-", " 1, "));
+      const dateA = new Date(a.replace('-', ' 1, '));
+      const dateB = new Date(b.replace('-', ' 1, '));
       return dateA - dateB;
     });
 
@@ -186,10 +183,54 @@ const AdminDashboard = () => {
       labels: sortedKeys,
       datasets: [
         {
-          label: "Total Units Sold",
-          data: sortedKeys.map((key) => monthlySalesData[key]),
-          borderColor: "rgb(75, 192, 192)",
-          backgroundColor: "rgba(75, 192, 192, 0.5)",
+          label: `Total Units Sold (${selectedProductId ? products.find(p => p.id === selectedProductId)?.name : 'All Products'})`,
+          data: sortedKeys.map(key => monthlySalesData[key]),
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          tension: 0.1,
+        },
+      ],
+    };
+};
+
+
+  // --- Sales Analytics Dashboard (Updated) ---
+const getMonthlySales = () => {
+    const monthlySalesData = {};
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    // Filter sales based on the selected store ID
+    const filteredSales = selectedStoreId 
+        ? sales.filter(sale => sale.storeId === selectedStoreId) 
+        : sales;
+
+    filteredSales.forEach(sale => {
+      if (sale.timestamp && typeof sale.timestamp.toDate === 'function') {
+        const date = sale.timestamp.toDate();
+        const monthYear = `${months[date.getMonth()]}-${date.getFullYear()}`;
+        
+        if (monthlySalesData[monthYear]) {
+          monthlySalesData[monthYear] += sale.quantitySold;
+        } else {
+          monthlySalesData[monthYear] = sale.quantitySold;
+        }
+      }
+    });
+
+    const sortedKeys = Object.keys(monthlySalesData).sort((a, b) => {
+      const dateA = new Date(a.replace('-', ' 1, '));
+      const dateB = new Date(b.replace('-', ' 1, '));
+      return dateA - dateB;
+    });
+
+    return {
+      labels: sortedKeys,
+      datasets: [
+        {
+          label: `Total Units Sold (${selectedStoreId ? stores.find(s => s.id === selectedStoreId)?.name : 'All Stores'})`,
+          data: sortedKeys.map(key => monthlySalesData[key]),
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.5)',
           tension: 0.1,
         },
       ],
@@ -197,141 +238,130 @@ const AdminDashboard = () => {
   };
 
   const monthlySalesChartData = getMonthlySales();
+  const monthlyProductSalesChartData = getMonthlyProductSales();
 
   const handleLogout = async () => {
     await signOut(auth);
     navigate("/login");
   };
 
-  return (
-    <div className="dashboard-container">
-      <header>
-        <h2 className="font-5x font-bold">Admin Dashboard</h2>
-        <button onClick={handleLogout}>Log Out</button>
-      </header>
-
+  const StoresSection = () => (
+    <>
       <div className="form-section">
         <h3>Add New Store</h3>
         <form onSubmit={handleAddStore}>
-          <input
-            type="text"
-            placeholder="Store Name"
-            value={storeName}
-            onChange={(e) => setStoreName(e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Location"
-            value={storeLocation}
-            onChange={(e) => setStoreLocation(e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Distributor Name"
-            value={storeDistributor}
-            onChange={(e) => setStoreDistributor(e.target.value)}
-            required
-          />
+          <input type="text" placeholder="Store Name" value={storeName} onChange={(e) => setStoreName(e.target.value)} required />
+          <input type="text" placeholder="Location" value={storeLocation} onChange={(e) => setStoreLocation(e.target.value)} required />
+          <input type="text" placeholder="Distributor Name" value={storeDistributor} onChange={(e) => setStoreDistributor(e.target.value)} required />
           <button type="submit">Add Store</button>
         </form>
       </div>
-
       <div className="list-section">
-        <h3 className="font-bold font-2x m-3 ">Existing Stores</h3>
-        <table className="border-2">
-          <thead className="border-2">
-            <tr className="border-2">
-              <th className="px-2 border-2">Store Name</th>
-              <th className="px-2 border-2">Location</th>
-              <th className="px-2 border-2">Distributor</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {stores.map((store) => (
-              <tr key={store.id}>
-                <td className="border-2">{store.name}</td>
-                <td className="border-2">{store.location}</td>
-                <td className="border-2">{store.distributor}</td>
-                <td>
-                  <button onClick={() => handleDeleteStore(store.id, store.name)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <h3>Existing Stores</h3>
+        <ul>
+          {stores.map(store => (
+            <li key={store.id}>
+              {store.name} - {store.location} ({store.distributor})
+              <button onClick={() => handleDeleteStore(store.id, store.name)}>Delete</button>
+            </li>
+          ))}
+        </ul>
       </div>
-      <hr className="m-5"></hr>
+    </>
+  );
 
+  const InventorySection = () => (
+    <>
       <div className="form-section">
-        <h3 className="m-3 font-bold font-2x">Add New Product</h3>
+        <h3>Add New Product</h3>
         <form onSubmit={handleAddProduct}>
-          <input
-            type="text"
-            placeholder="Product Name"
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
-            required
-          />
-          <input
-            type="number"
-            placeholder="Quantity"
-            value={productQuantity}
-            onChange={(e) => setProductQuantity(e.target.value)}
-            required
-          />
-          <input
-            type="number"
-            placeholder="Unit Price"
-            value={unitPrice}
-            onChange={(e) => setUnitPrice(e.target.value)}
-            required
-          />
+          <select value={selectedStoreForProduct} onChange={(e) => setSelectedStoreForProduct(e.target.value)} required>
+            <option value="">-- Select Store --</option>
+            {stores.map(store => (
+              <option key={store.id} value={store.id}>{store.name}</option>
+            ))}
+          </select>
+          <input type="text" placeholder="Product Name" value={newProductName} onChange={(e) => setNewProductName(e.target.value)} required />
+          <input type="number" placeholder="Quantity" value={newProductQuantity} onChange={(e) => setNewProductQuantity(e.target.value)} required />
           <button type="submit">Add Product</button>
         </form>
       </div>
-
       <div className="list-section">
-        <h3 className="m-5 font-bold font-4x">Current Inventory</h3>
+        <h3>Current Inventory</h3>
         <table>
           <thead>
             <tr>
-              <th className="px-2 border-2">Name</th>
-              <th className="px-2 border-2">Quantity</th>
-              <th className="px-2 border-2">Unit price KSh</th>
-              <th className="px-2 border-2">Total sales</th>
-              <th className="px-2 border-2">Actions</th>
+              <th>Name</th>
+              <th>Quantity</th>
+              <th>Store</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {products.map(product => (
               <tr key={product.id}>
-                <td className="border-2">{product.name}</td>
-                <td className="border-2">{product.quantity}</td>
-                <td className="border-2">KSh{product.unitPrice}</td>
-                <td className="border-2">KSh{product.totalSales}</td>
-
-                <td className="border-2">
-                  <button onClick={() => handleDeleteProduct(product.id)}>
-                    Delete
-                  </button>
+                <td>{product.name}</td>
+                <td>{product.quantity}</td>
+                <td>{stores.find(s => s.id === product.storeId)?.name || 'N/A'}</td>
+                <td>
+                  <button onClick={() => handleDeleteProduct(product.id, product.name)}>Delete</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+    </>
+  );
 
-      <div className="analytics-section">
-        <h3 className="m-2 font-bold font-3x mt-5">Sales Analytics</h3>
+  const AnalyticsSection = () => (
+    <div className="analytics-section">
+      <h3>Sales Analytics</h3>
+      <h4>Monthly Sales by Store</h4>
+      <select value={selectedStoreId} onChange={(e) => setSelectedStoreId(e.target.value)}>
+        <option value="">All Stores</option>
+        {stores.map(store => (
+            <option key={store.id} value={store.id}>{store.name}</option>
+        ))}
+      </select>
+      <div style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+          {sales.length > 0 ? (
+              <Line data={monthlySalesChartData} />
+          ) : (
+              <p>No sales data to display yet. Record some sales from the employee dashboard.</p>
+          )}
+      </div>
+      <h4>Monthly Sales by Product</h4>
+      <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)}>
+        <option value="">All Products</option>
+        {products.map(product => (
+            <option key={product.id} value={product.id}>{product.name}</option>
+        ))}
+      </select>
+      <div style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+          {sales.length > 0 ? (
+              <Line data={monthlyProductSalesChartData} />
+          ) : (
+              <p>No sales data to display yet. Record some sales from the employee dashboard.</p>
+          )}
+      </div>
+    </div>
+  );
 
-        <h4>Monthly Sales Trend</h4>
-        <div style={{ width: "100%", maxWidth: "600px", margin: "0 auto" }}>
-          <Line data={monthlySalesChartData} />
-        </div>
+  return (
+    <div className="dashboard-layout">
+      <Sidebar />
+      <div className="main-content">
+        <header>
+          <h2>Admin Dashboard</h2>
+          <button onClick={handleLogout}>Log Out</button>
+        </header>
+        <Routes>
+          <Route path="stores" element={<StoresSection />} />
+          <Route path="inventory" element={<InventorySection />} />
+          <Route path="analytics" element={<AnalyticsSection />} />
+          <Route path="/" element={<StoresSection />} />
+        </Routes>
       </div>
     </div>
   );

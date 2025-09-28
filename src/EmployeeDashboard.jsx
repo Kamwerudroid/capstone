@@ -7,6 +7,7 @@ import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
+
 const EmployeeDashboard = () => {
   const [products, setProducts] = useState([]);
   const [stores, setStores] = useState([]);
@@ -39,11 +40,11 @@ const EmployeeDashboard = () => {
 
   // Function to record a sale by decrementing stock
   const handleRecordSale = async (productId, currentQuantity) => {
-    if (currentQuantity <= 0) return;
-    if (!selectedStore) {
-        alert('Please select your store first!');
-        return;
-    }
+  if (currentQuantity <= 0) return;
+  if (!selectedStore) {
+      alert('Please select your store first!'); 
+      return;
+  }
 
     const productDoc = doc(db, 'products', productId);
     await updateDoc(productDoc, { quantity: currentQuantity - 1 });
@@ -58,13 +59,13 @@ const EmployeeDashboard = () => {
     getProducts();
   };
 
-  // NEW: Function to handle manual sale entry from the form
+  // Function to handle manual sale entry from the form
   const handleManualSale = async (e) => {
-    e.preventDefault();
-    if (!selectedStore || !saleProductId || !saleQuantity) {
-        alert('Please fill out all sales fields.');
-        return;
-    }
+  e.preventDefault();
+  if (!selectedStore || !saleProductId || !saleQuantity) {
+      alert('Please fill out all sales fields.'); 
+      return;
+  }
     
     const quantity = Number(saleQuantity);
     if (quantity <= 0) {
@@ -142,7 +143,7 @@ const EmployeeDashboard = () => {
         </form>
       </div>
 
-      <div className="inventory-list">
+      <div className="inventory-list m-3">
         <h3>Sold Inventory</h3>
         <table>
           <thead>
@@ -158,7 +159,7 @@ const EmployeeDashboard = () => {
                 <td>{product.name}</td>
                 <td>{product.quantity}</td>
                 <td>
-                  <button onClick={() => handleRecordSale(product.id, product.quantity)}>Record Single Sale (-1)</button>
+                  <button onClick={() => handleRecordSale(product.id, product.quantity)}>Record Single Sale </button>
                 </td>
               </tr>
             ))}

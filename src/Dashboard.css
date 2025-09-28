@@ -74,3 +74,22 @@ header {
 .inventory-list th {
   background-color: #f2f2f2;
 }
+
+.dashboard-layout {
+  display: flex;
+}
+
+.main-content {
+  margin-left: 250px; /* Same as sidebar width */
+  padding: 20px;
+  width: 100%;
+}
+
+.main-content header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 20px;
+}
